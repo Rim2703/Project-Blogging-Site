@@ -102,7 +102,7 @@ const authorLogin = async function (req, res) {
             "Project1-Group45"
         );
         res.setHeader("x-auth-token", token);
-        res.status(200).send({ status: true, token: token });
+        res.status(200).send({ status: true, data: token });
     }
     catch (err) {
         res.status(500).send({ status: false, Error: err.message });

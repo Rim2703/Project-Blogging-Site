@@ -1,15 +1,17 @@
-const express=require("express")
-const router=express.Router();
-const authorController=require("../Controllers/authorController")
-const blogController=require("../Controllers/blogController")
+const express = require("express")
+const router = express.Router();
+const authorController = require("../Controllers/authorController")
+const blogController = require("../Controllers/blogController")
 const middlewares = require("../middleware/auth")
 
-// ________________________________Author Api_________________________________
+// ________________________________Author Api's_________________________________
+
 router.post("/authors", authorController.authors)
 
 router.post("/login", authorController.authorLogin)
 
-// ________________________________Blogs Api_________________________________
+// ________________________________Blogs Api's______________________________________
+
 router.post("/blogs", middlewares.authentication, blogController.createBlog)
 
 router.get("/blogs", middlewares.authentication, blogController.getBlog)

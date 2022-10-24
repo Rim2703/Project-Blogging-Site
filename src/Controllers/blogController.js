@@ -15,7 +15,9 @@ const isValid = function (value) {
   if (typeof value === "string" && value.trim().length === 0) return false
   return true
 }
-// __________CREATE BLOG_________
+
+// ___________________________CREATE BLOG_______________________________
+
 const createBlog = async function (req, res) {
   try {
     let data = req.body
@@ -41,23 +43,22 @@ const createBlog = async function (req, res) {
     if (!isValid(category)) {
       return res.status(400).send({ satust: false, msg: "Please Provide Categary" })
     }
-    if (!isValid(subcategory)) {
+    if (subcategory && !isValid(subcategory)) {
       return res.status(400).send({ status: false, msg: "Please provide Subcategary" })
     }
 
     let savedBlog = await blogModel.create(data)
-    res.status(201).send({ msg: savedBlog })
+    res.status(201).send({ data: savedBlog })
   }
   catch (err) {
     res.status(500).send({ status: false, Error: err.message })
   }
 }
 
-// ___________GET BLOG DATA USING QUERY PARAMS____________
+// ______________________GET BLOG DATA USING QUERY PARAMS______________________
 
 const getBlog = async function (req, res) {
   try {
-
     let { ...data } = req.query
     // check whether the authorId is present or not 
     if (data.hasOwnProperty('authorId')) {
@@ -67,36 +68,33 @@ const getBlog = async function (req, res) {
 
     //finding the data for empty values 
     if (!isValidreqbody(data)) {
-      return res.status(400).send({ status: false, msg: "Please Provide data for filter!!" });
+      return res.status(400).send({ status: false, msg: "Please Provide filter to fetch data!!" });
     }
 
     let getAllBlogs = await blogModel.find({ isDeleted: false, isPublished: true }).populate('authorId');
 
     //check that the getAllBlogs is empty or not
-
     if (getAllBlogs.length == 0) {
       return res.status(404).send({ status: false, msg: "No such blog exists" });
     }
 
+    // data  are not deleted and are published 
     data.isDeleted = false;
     data.isPublished = true;
-
-    // data  are not deleted and are published 
 
     let getBlogs = await blogModel.find(data).populate('authorId');
 
     // getBlogs is empty or not
+    if (getBlogs.length == 0) return res.status(404).send({ status: false, msg: "No such blog exist" });
 
-    if (getBlogs.length == 0)
-      return res.status(404).send({ status: false, msg: "No such blog exist" });
-    res.status(200).send({ status: true, data: getBlogs })
+    return res.status(200).send({ status: true, data: getBlogs })
 
   } catch (err) {
     res.status(500).send({ status: false, error: err.message });
   }
 };
 
-// __________UPDATE BLOG DATA USING PATH PARAMS________________
+// _____________________UPDATE BLOG DATA USING PATH PARAMS______________________________
 
 const updateBlog = async function (req, res) {
   try {
@@ -122,13 +120,12 @@ const updateBlog = async function (req, res) {
       return res.status(400).send({ status: false, msg: "data is required to update" });
 
     //update the blog data in data base by blog id
-
     let updatedBlog = await blogModel.findOneAndUpdate({ $and: [{ isDeleted: false }, { _id: getBlogId },] }, {
       $push: { tags: data.tags, category: data.category, subcategory: data.subcategory },
       title: data.title,
       body: data.body,
-      isPublished: data.isPublished
-      , publishedAt: moment(new Date()).format('DD/MM/YYYY h:mma')
+      isPublished: data.isPublished,
+      publishedAt: moment(new Date()).format('DD/MM/YYYY h:mma')
     }, { new: true })
 
     return res.status(200).send({ status: true, data: updatedBlog })
@@ -138,7 +135,7 @@ const updateBlog = async function (req, res) {
   }
 };
 
-// ___________DELETE BLOG USING PATH PARAMS____________
+// _________________________DELETE BLOG USING PATH PARAMS______________________________
 
 const deleteBlogByPathParams = async function (req, res) {
   try {
@@ -165,7 +162,7 @@ const deleteBlogByPathParams = async function (req, res) {
   }
 }
 
-// __________DELETE USING QUERY PARAMS________________
+// ________________________DELETE USING QUERY PARAMS___________________________
 
 const deletedBlogByQueryParam = async function (req, res) {
   try {
